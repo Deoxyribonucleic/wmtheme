@@ -1,0 +1,4 @@
+{
+	"$LINKS/xinitrc": "xinitrc",
+	"$LINKS/bspwmrc": "bspwm/bspwmrc"
+}

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+function usage()
+{
+	echo "$0 <theme>"
+}
+
+
+CONFIG_DIR="/home/deox/projects/wmtheme"
+CONFIG_FILE="$CONFIG_DIR/wmtheme.conf"
+LINKS_FILE="$CONFIG_DIR/links.json"
+
+source $CONFIG_FILE
+LINKS=$LINK_DIR
+
+
+THEME_NAME=$1
+if [ "$THEME_NAME" == "" ]; then
+	usage
+	exit 1
+fi
+
+THEME="$THEME_DIR/$THEME_NAME"
+
+if [ ! -d "$THEME" ]; then
+	echo "Theme '$THEME_NAME' doesn't exist."
+	exit 2
+fi
+
+echo $THEME
+
+# Create links
+for KEY in $(jq 'keys[]' < $LINKS_FILE); do
+	LINK=$(eval "echo $KEY")
+	TARGET=$THEME/$(jq -r ".$KEY" < $LINKS_FILE)
+
+	if [ -e "$TARGET" ]; then
+		echo "$LINK => $TARGET"
+		ln -sf "$TARGET" "$LINK"
+	else
+		echo "Warning: '$TARGET' doesn't exist."
+		# If theme doesn't provide file, clear it
+		rm "$LINK" || true
+		touch "$LINK"
+	fi
+done
+
+# If theme has run-commands file, run it
+if [ -e "$THEME/themerc" ]; then
+	bash "$THEME/themerc"
+fi
+

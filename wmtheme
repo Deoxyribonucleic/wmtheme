@@ -29,14 +29,14 @@ fi
 
 echo $THEME
 
-# Create links
+# Create common links
 for KEY in $(jq 'keys[]' < $LINKS_FILE); do
 	LINK=$(eval "echo $KEY")
 	TARGET=$THEME/$(jq -r ".$KEY" < $LINKS_FILE)
 
 	if [ -e "$TARGET" ]; then
 		echo "$LINK => $TARGET"
-		ln -sf "$TARGET" "$LINK"
+		ln -snf "$TARGET" "$LINK"
 	else
 		echo "Warning: '$TARGET' doesn't exist."
 		# If theme doesn't provide file, clear it
@@ -44,6 +44,32 @@ for KEY in $(jq 'keys[]' < $LINKS_FILE); do
 		touch "$LINK"
 	fi
 done
+
+# Remove links from current them
+if [ -e "$LINKS/current-theme" ] && [ -e "$LINKS/current-theme/links.json" ]; then
+	THEME_LINKS_FILE=$LINKS/current-theme/links.json
+	for KEY in $(jq 'keys[]' < $THEME_LINKS_FILE); do
+		LINK=$(eval "echo $KEY")
+		rm "$LINK" || true
+	done
+fi
+
+# Create theme-specific links, if specified
+if [ -e "$THEME/links.json" ]; then
+	THEME_LINKS_FILE=$THEME/links.json
+	for KEY in $(jq 'keys[]' < $THEME_LINKS_FILE); do
+		LINK=$(eval "echo $KEY")
+		TARGET=$THEME/$(jq -r ".$KEY" < $THEME_LINKS_FILE)
+
+		if [ -e "$TARGET" ]; then
+			echo "$LINK => $TARGET"
+			ln -snf "$TARGET" "$LINK"
+		fi
+	done
+fi
+
+echo "$LINKS/current-theme => $THEME"
+ln -snf "$THEME" "$LINKS/current-theme"
 
 # If theme has run-commands file, run it
 if [ -e "$THEME/themerc" ]; then

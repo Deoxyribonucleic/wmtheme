@@ -1,4 +1,5 @@
 {
 	"$LINKS/xinitrc": "xinitrc",
-	"$LINKS/bspwmrc": "bspwm/bspwmrc"
+	"$LINKS/bspwmrc": "bspwm/bspwmrc",
+	"/home/deox/.config/xfce4/terminal/terminalrc": "xfce4-terminal"
 }
